@@ -48,6 +48,12 @@ impl Drop for QrackCircuit {
     }
 }
 
+impl Default for QrackCircuit {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl QrackCircuit {
     // constructors
     pub fn new() -> Self {
@@ -81,7 +87,7 @@ impl QrackCircuit {
         Self { cid }
     }
 
-    pub fn swap(&self, q1: u64, q2: u64) -> () {
+    pub fn swap(&self, q1: u64, q2: u64) {
         // Add a 'Swap' gate to the circuit
         //
         // Args:
@@ -90,7 +96,7 @@ impl QrackCircuit {
         unsafe { qrack_system::qcircuit_swap(self.cid, q1, q2) }
     }
 
-    pub fn mtrx(&self, m: &[f64; 8], q: u64) -> () {
+    pub fn mtrx(&self, m: &[f64; 8], q: u64) {
         // Operation from matrix.
         //
         // Applies arbitrary operation defined by the given matrix.
@@ -102,7 +108,7 @@ impl QrackCircuit {
         unsafe { qrack_system::qcircuit_append_1qb(self.cid, _m.as_mut_ptr(), q) }
     }
 
-    pub fn ucmtrx(&self, c: Vec<u64>, m: &[f64; 8], q: u64, p: u64) -> () {
+    pub fn ucmtrx(&self, c: Vec<u64>, m: &[f64; 8], q: u64, p: u64) {
         // Multi-controlled arbitrary operator with arbitrary controls
         //
         // If all control qubits match 'p' permutation by bit order, then the arbitrary
@@ -141,7 +147,7 @@ impl QrackCircuit {
         qsim.check_error()
     }
 
-    pub fn out_to_file(&self, filename: &str) -> () {
+    pub fn out_to_file(&self, filename: &str) {
         // Output optimized circuit to file
         //
         // Outputs the (optimized) circuit to a file named
@@ -160,7 +166,7 @@ impl QrackCircuit {
         }
     }
 
-    pub fn in_from_file(&self, filename: &str) -> () {
+    pub fn in_from_file(&self, filename: &str) {
         // Read in optimized circuit from file
         //
         // Reads in an (optimized) circuit from a file named

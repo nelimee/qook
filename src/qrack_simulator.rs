@@ -43,7 +43,7 @@ impl QrackSimulator {
                 return Err(QrackError {});
             }
         }
-        return Ok(Self { sid });
+        Ok(Self { sid })
     }
     pub fn new_layers(
         qubit_count: u64,
@@ -98,7 +98,7 @@ impl QrackSimulator {
                 return Err(QrackError {});
             }
         }
-        return Ok(Self { sid });
+        Ok(Self { sid })
     }
 
     // non-quantum
@@ -110,11 +110,11 @@ impl QrackSimulator {
         if self.get_error() != 0 {
             return Err(QrackError {});
         }
-        return Ok(());
+        Ok(())
     }
 
     pub fn get_sid(&self) -> u64 {
-        return self.sid;
+        self.sid
     }
 
     pub fn seed(&self, s: u64) -> Result<(), QrackError> {

@@ -79,7 +79,7 @@ impl QrackNeuron<'_> {
         if self.get_error() != 0 {
             return Err(QrackError {});
         }
-        return Ok(());
+        Ok(())
     }
 
     // constructors
