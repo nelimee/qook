@@ -40,7 +40,7 @@ pub struct QrackNeuron<'a> {
     activation_fn: NeuronActivationFn,
     alpha: f64,
     tolerance: f64,
-    amp_count: u64
+    amp_count: u64,
 }
 
 impl Clone for QrackNeuron<'_> {
@@ -49,7 +49,7 @@ impl Clone for QrackNeuron<'_> {
         unsafe {
             nid = qrack_system::clone_qneuron(self.nid);
         }
-        Self{
+        Self {
             nid,
             simulator: self.simulator,
             controls: self.controls.clone(),
@@ -57,7 +57,7 @@ impl Clone for QrackNeuron<'_> {
             activation_fn: self.activation_fn.clone(),
             alpha: self.alpha,
             tolerance: self.tolerance,
-            amp_count: self.amp_count
+            amp_count: self.amp_count,
         }
     }
 }
@@ -73,17 +73,15 @@ impl Drop for QrackNeuron<'_> {
 impl QrackNeuron<'_> {
     // private functions
     fn get_error(&self) -> i32 {
-        unsafe {
-            qrack_system::get_error(self.nid)
-        }
+        unsafe { qrack_system::get_error(self.nid) }
     }
     fn check_error(&self) -> Result<(), QrackError> {
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         return Ok(());
     }
-    
+
     // constructors
     pub fn new<'a: 'b, 'b>(
         sim: &'a QrackSimulator,
@@ -91,8 +89,8 @@ impl QrackNeuron<'_> {
         trgt: u64,
         act_fn: NeuronActivationFn,
         a: f64,
-        t: f64
-   ) -> Result<QrackNeuron<'b>, QrackError> {
+        t: f64,
+    ) -> Result<QrackNeuron<'b>, QrackError> {
         let nid;
         let mut _controls = ctrls.to_vec();
         unsafe {
@@ -103,14 +101,14 @@ impl QrackNeuron<'_> {
                 trgt,
                 act_fn.clone() as u64,
                 a,
-                t
+                t,
             );
             if qrack_system::get_error(nid) != 0 {
-                return Err(QrackError{});
+                return Err(QrackError {});
             }
         }
         let amp_cnt = 1 << (ctrls.len() + 1);
-        Ok(QrackNeuron{
+        Ok(QrackNeuron {
             nid,
             simulator: sim,
             controls: ctrls,
@@ -118,7 +116,7 @@ impl QrackNeuron<'_> {
             activation_fn: act_fn,
             alpha: a,
             tolerance: t,
-            amp_count: amp_cnt
+            amp_count: amp_cnt,
         })
     }
 
@@ -154,12 +152,10 @@ impl QrackNeuron<'_> {
         // Raises:
         //     RuntimeError: QrackNeuron C++ library raised an exception.
 
-        let mut result = vec![0.0;self.amp_count as usize];
-        unsafe {
-            qrack_system::get_qneuron_angles(self.nid, result.as_mut_ptr())
-        }
+        let mut result = vec![0.0; self.amp_count as usize];
+        unsafe { qrack_system::get_qneuron_angles(self.nid, result.as_mut_ptr()) }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -187,7 +183,7 @@ impl QrackNeuron<'_> {
         //
         // Nonlinear activation functions can be important to neural net
         // applications, like DNN. The available activation functions are
-        // enumerated in `NeuronActivationFn`. 
+        // enumerated in `NeuronActivationFn`.
         //
         // Raises:
         //     RuntimeError: QrackNeuron C++ library raised an exception.
@@ -216,12 +212,12 @@ impl QrackNeuron<'_> {
         // Raises:
         //     RuntimeError: QrackNeuron C++ library raised an exception.
 
-        let result:f64;
+        let result: f64;
         unsafe {
             result = qrack_system::qneuron_predict(self.nid, e, r);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -238,12 +234,12 @@ impl QrackNeuron<'_> {
         // Raises:
         //     RuntimeError: QrackNeuron C++ library raised an exception.
 
-        let result:f64;
+        let result: f64;
         unsafe {
             result = qrack_system::qneuron_unpredict(self.nid, e);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }

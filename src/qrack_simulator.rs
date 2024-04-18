@@ -12,7 +12,7 @@ pub struct QrackSimulator {
     //
     // Attributes:
     //     sid(i64): Corresponding simulator id.
-    sid: u64
+    sid: u64,
 }
 
 impl Clone for QrackSimulator {
@@ -21,7 +21,7 @@ impl Clone for QrackSimulator {
         unsafe {
             sid = qrack_system::init_clone(self.sid);
         }
-        Self{ sid }
+        Self { sid }
     }
 }
 
@@ -40,12 +40,13 @@ impl QrackSimulator {
         unsafe {
             sid = qrack_system::init_count(qubit_count, false);
             if qrack_system::get_error(sid) != 0 {
-                return Err(QrackError{});
+                return Err(QrackError {});
             }
         }
-        return Ok(Self{ sid });
+        return Ok(Self { sid });
     }
-    pub fn new_layers(qubit_count: u64,
+    pub fn new_layers(
+        qubit_count: u64,
         is_tensor_network: bool,
         is_schmidt_decompose_multi: bool,
         is_schmidt_decompose: bool,
@@ -54,8 +55,8 @@ impl QrackSimulator {
         is_paged: bool,
         is_cpu_gpu_hybrid: bool,
         is_opencl: bool,
-        is_host_pointer: bool) -> Result<Self, QrackError> {
-
+        is_host_pointer: bool,
+    ) -> Result<Self, QrackError> {
         let sid;
         if is_tensor_network
             && is_schmidt_decompose
@@ -63,7 +64,8 @@ impl QrackSimulator {
             && !is_binary_decision_tree
             && is_paged
             && is_cpu_gpu_hybrid
-            && is_opencl {
+            && is_opencl
+        {
             if is_schmidt_decompose_multi {
                 unsafe {
                     sid = qrack_system::init_count(qubit_count, is_host_pointer);
@@ -75,44 +77,44 @@ impl QrackSimulator {
             }
         } else {
             unsafe {
-                sid = qrack_system::init_count_type(qubit_count,
-                                                              is_tensor_network,
-                                                              is_schmidt_decompose_multi,
-                                                              is_schmidt_decompose,
-                                                              is_stabilizer_hybrid,
-                                                              is_binary_decision_tree,
-                                                              is_paged,
-                                                              false,
-                                                              is_cpu_gpu_hybrid,
-                                                              is_opencl,
-                                                              is_host_pointer);
+                sid = qrack_system::init_count_type(
+                    qubit_count,
+                    is_tensor_network,
+                    is_schmidt_decompose_multi,
+                    is_schmidt_decompose,
+                    is_stabilizer_hybrid,
+                    is_binary_decision_tree,
+                    is_paged,
+                    false,
+                    is_cpu_gpu_hybrid,
+                    is_opencl,
+                    is_host_pointer,
+                );
             }
         }
 
         unsafe {
             if qrack_system::get_error(sid) != 0 {
-                return Err(QrackError{});
+                return Err(QrackError {});
             }
         }
-        return Ok(Self{ sid });
+        return Ok(Self { sid });
     }
 
     // non-quantum
     pub fn get_error(&self) -> i32 {
-        unsafe {
-            qrack_system::get_error(self.sid)
-        }
+        unsafe { qrack_system::get_error(self.sid) }
     }
 
     pub fn check_error(&self) -> Result<(), QrackError> {
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
-        return Ok(())
+        return Ok(());
     }
 
     pub fn get_sid(&self) -> u64 {
-        return self.sid
+        return self.sid;
     }
 
     pub fn seed(&self, s: u64) -> Result<(), QrackError> {
@@ -295,7 +297,7 @@ impl QrackSimulator {
         self.check_error()
     }
 
-    pub fn mtrx(&self, m: &[f64;8], q: u64) -> Result<(), QrackError> {
+    pub fn mtrx(&self, m: &[f64; 8], q: u64) -> Result<(), QrackError> {
         // Operation from matrix.
         //
         // Applies arbitrary operation defined by the given matrix.
@@ -348,12 +350,18 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if b.len() != q.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _b = b.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::Exp(self.sid, _b.len() as u64, _b.as_mut_ptr() as *mut i32, ph, _q.as_mut_ptr() as *mut u64);
+            qrack_system::Exp(
+                self.sid,
+                _b.len() as u64,
+                _b.as_mut_ptr() as *mut i32,
+                ph,
+                _q.as_mut_ptr() as *mut u64,
+            );
         }
         self.check_error()
     }
@@ -542,7 +550,7 @@ impl QrackSimulator {
         self.check_error()
     }
 
-    pub fn mcmtrx(&self, c: Vec<u64>, m: &[f64;8], q: u64) -> Result<(), QrackError> {
+    pub fn mcmtrx(&self, c: Vec<u64>, m: &[f64; 8], q: u64) -> Result<(), QrackError> {
         // Multi-controlled arbitraty operator
         //
         // If all controlled qubits are `|1>` then the arbitrary operation by
@@ -559,7 +567,13 @@ impl QrackSimulator {
         let mut _m = [m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7]];
         let mut _c = c.to_vec();
         unsafe {
-            qrack_system::MCMtrx(self.sid, _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), q);
+            qrack_system::MCMtrx(
+                self.sid,
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                q,
+            );
         }
         self.check_error()
     }
@@ -746,7 +760,7 @@ impl QrackSimulator {
         self.check_error()
     }
 
-    pub fn macmtrx(&self, c: Vec<u64>, m: &[f64;8], q: u64) -> Result<(), QrackError> {
+    pub fn macmtrx(&self, c: Vec<u64>, m: &[f64; 8], q: u64) -> Result<(), QrackError> {
         // Anti multi-controlled arbitraty operator
         //
         // If all controlled qubits are `|0>` then the arbitrary operation by
@@ -763,12 +777,18 @@ impl QrackSimulator {
         let mut _m = [m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7]];
         let mut _c = c.to_vec();
         unsafe {
-            qrack_system::MACMtrx(self.sid, _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), q);
+            qrack_system::MACMtrx(
+                self.sid,
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                q,
+            );
         }
         self.check_error()
     }
 
-    pub fn ucmtrx(&self, c: Vec<u64>, m: &[f64;8], q: u64, p: u64) -> Result<(), QrackError> {
+    pub fn ucmtrx(&self, c: Vec<u64>, m: &[f64; 8], q: u64, p: u64) -> Result<(), QrackError> {
         // Multi-controlled arbitrary operator with arbitrary controls
         //
         // If all control qubits match 'p' permutation by bit order, then the arbitrary
@@ -786,7 +806,14 @@ impl QrackSimulator {
         let mut _m = [m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7]];
         let mut _c = c.to_vec();
         unsafe {
-            qrack_system::UCMtrx(self.sid, _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), q, p);
+            qrack_system::UCMtrx(
+                self.sid,
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                q,
+                p,
+            );
         }
         self.check_error()
     }
@@ -808,7 +835,13 @@ impl QrackSimulator {
         let mut _c = c.to_vec();
         let mut _m = m.to_vec();
         unsafe {
-            qrack_system::Multiplex1Mtrx(self.sid, _c.len() as u64, _c.as_mut_ptr(), q, _m.as_mut_ptr());
+            qrack_system::Multiplex1Mtrx(
+                self.sid,
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                q,
+                _m.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -889,7 +922,13 @@ impl QrackSimulator {
         self.check_error()
     }
 
-    pub fn mcexp(&self, b: Vec<Pauli>, ph: f64, cs: Vec<u64>, q: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcexp(
+        &self,
+        b: Vec<Pauli>,
+        ph: f64,
+        cs: Vec<u64>,
+        q: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Arbitrary exponentiation
         //
         // `exp(b, theta) = e^{i*theta*[b_0 . b_1 ...]}`
@@ -904,13 +943,21 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if b.len() != q.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _b = b.to_vec();
         let mut _cs = cs.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::MCExp(self.sid, _b.len() as u64, _b.as_mut_ptr() as *mut i32, ph, _cs.len() as u64, _cs.as_mut_ptr(), _q.as_mut_ptr() as *mut u64);
+            qrack_system::MCExp(
+                self.sid,
+                _b.len() as u64,
+                _b.as_mut_ptr() as *mut i32,
+                ph,
+                _cs.len() as u64,
+                _cs.as_mut_ptr(),
+                _q.as_mut_ptr() as *mut u64,
+            );
         }
         self.check_error()
     }
@@ -1046,12 +1093,12 @@ impl QrackSimulator {
         // Returns:
         //     Measurement result.
 
-        let result:u64;
+        let result: u64;
         unsafe {
             result = qrack_system::M(self.sid, q);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -1071,12 +1118,12 @@ impl QrackSimulator {
         // Returns:
         //     Measurement result.
 
-        let result:u64;
+        let result: u64;
         unsafe {
             result = qrack_system::ForceM(self.sid, q, r);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -1093,12 +1140,12 @@ impl QrackSimulator {
         // Returns:
         //     Measurement result of all qubits.
 
-        let result:u64;
+        let result: u64;
         unsafe {
             result = qrack_system::MAll(self.sid);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -1120,16 +1167,21 @@ impl QrackSimulator {
         //     Measurement result.
 
         if b.len() != q.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _b = b.to_vec();
         let mut _q = q.to_vec();
-        let result:u64;
+        let result: u64;
         unsafe {
-            result = qrack_system::Measure(self.sid, _b.len() as u64, _b.as_mut_ptr() as *mut i32, _q.as_mut_ptr());
+            result = qrack_system::Measure(
+                self.sid,
+                _b.len() as u64,
+                _b.as_mut_ptr() as *mut i32,
+                _q.as_mut_ptr(),
+            );
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -1151,12 +1203,18 @@ impl QrackSimulator {
         //     Vec<u64> of measurement result.
 
         let mut _q = q.to_vec();
-        let mut result = vec![0;s as usize];
+        let mut result = vec![0; s as usize];
         unsafe {
-            qrack_system::MeasureShots(self.sid, _q.len() as u64, _q.as_mut_ptr(), s, result.as_mut_ptr());
+            qrack_system::MeasureShots(
+                self.sid,
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                s,
+                result.as_mut_ptr(),
+            );
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -1191,7 +1249,13 @@ impl QrackSimulator {
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::ADD(self.sid, _a.len() as u64, _a.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::ADD(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1211,7 +1275,13 @@ impl QrackSimulator {
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::SUB(self.sid, _a.len() as u64, _a.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::SUB(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1233,7 +1303,14 @@ impl QrackSimulator {
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::ADDS(self.sid, _a.len() as u64, _a.as_mut_ptr(), s, _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::ADDS(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                s,
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1255,7 +1332,14 @@ impl QrackSimulator {
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::SUBS(self.sid, _a.len() as u64, _a.as_mut_ptr(), s, _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::SUBS(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                s,
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1276,13 +1360,20 @@ impl QrackSimulator {
         //    RuntimeError: QrackSimulator raised an exception.
 
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MUL(self.sid, _a.len() as u64, _a.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MUL(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1304,18 +1395,31 @@ impl QrackSimulator {
         //    RuntimeError: QrackSimulator raised an exception.
 
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::DIV(self.sid, _a.len() as u64, _a.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::DIV(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn muln(&self, a: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn muln(
+        &self,
+        a: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Modulo Multiplication
         //
         // Modulo Multiplication of the given integer to the given set of qubits
@@ -1331,22 +1435,36 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _m = m.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MULN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MULN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn divn(&self, a: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn divn(
+        &self,
+        a: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Modulo Division
         //
         // 'Modulo Division' of the given set of qubits by the given integer
@@ -1363,22 +1481,36 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _m = m.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::DIVN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::DIVN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn pown(&self, a: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn pown(
+        &self,
+        a: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Modulo Power
         //
         // Raises the qubit to the power `a` to which `mod m` is applied to.
@@ -1394,17 +1526,25 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _m = m.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::POWN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::POWN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1427,7 +1567,15 @@ impl QrackSimulator {
         let mut _c = c.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::MCADD(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::MCADD(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1450,12 +1598,26 @@ impl QrackSimulator {
         let mut _c = c.to_vec();
         let mut _q = q.to_vec();
         unsafe {
-            qrack_system::MCSUB(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr());
+            qrack_system::MCSUB(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn mcmul(&self, a: Vec<u64>, c: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcmul(
+        &self,
+        a: Vec<u64>,
+        c: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Controlled-multiply
         //
         // Multiplies the given integer to the given set of qubits if all controlled
@@ -1473,19 +1635,34 @@ impl QrackSimulator {
         //    RuntimeError: QrackSimulator raised an exception.
 
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _c = c.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MCMUL(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MCMUL(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn mcdiv(&self, a: Vec<u64>, c: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcdiv(
+        &self,
+        a: Vec<u64>,
+        c: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Controlled-divide.
         //
         // 'Divides' the given qubits by the integer if all controlled
@@ -1503,19 +1680,35 @@ impl QrackSimulator {
         //    RuntimeError: QrackSimulator raised an exception.
 
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _c = c.to_vec();
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MCDIV(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MCDIV(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn mcmuln(&self, a: Vec<u64>, c: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcmuln(
+        &self,
+        a: Vec<u64>,
+        c: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Controlled-modulo multiplication
         //
         // Modulo Multiplication of the given integer to the given set of qubits
@@ -1533,10 +1726,10 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _c = c.to_vec();
@@ -1544,12 +1737,29 @@ impl QrackSimulator {
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MCMULN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MCMULN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn mcdivn(&self, a: Vec<u64>, c: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcdivn(
+        &self,
+        a: Vec<u64>,
+        c: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Controlled-modulo multiplication
         //
         // Modulo division of the given integer to the given set of qubits
@@ -1568,10 +1778,10 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _c = c.to_vec();
@@ -1579,12 +1789,29 @@ impl QrackSimulator {
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MCDIVN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MCDIVN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
 
-    pub fn mcpown(&self, a: Vec<u64>, c: Vec<u64>, m: Vec<u64>, q: Vec<u64>, o: Vec<u64>) -> Result<(), QrackError> {
+    pub fn mcpown(
+        &self,
+        a: Vec<u64>,
+        c: Vec<u64>,
+        m: Vec<u64>,
+        q: Vec<u64>,
+        o: Vec<u64>,
+    ) -> Result<(), QrackError> {
         // Controlled-modulo Power
         //
         // Raises the qubit to the power `a` to which `mod m` is applied to if
@@ -1602,10 +1829,10 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if a.len() != m.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         if q.len() != o.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _a = a.to_vec();
         let mut _c = c.to_vec();
@@ -1613,7 +1840,17 @@ impl QrackSimulator {
         let mut _q = q.to_vec();
         let mut _o = o.to_vec();
         unsafe {
-            qrack_system::MCPOWN(self.sid, _a.len() as u64, _a.as_mut_ptr(), _c.len() as u64, _c.as_mut_ptr(), _m.as_mut_ptr(), _q.len() as u64, _q.as_mut_ptr(), _o.as_mut_ptr());
+            qrack_system::MCPOWN(
+                self.sid,
+                _a.len() as u64,
+                _a.as_mut_ptr(),
+                _c.len() as u64,
+                _c.as_mut_ptr(),
+                _m.as_mut_ptr(),
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _o.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1634,13 +1871,20 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if (8 * t.len()) < ((1 << qi.len()) * qv.len()) {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _qi = qi.to_vec();
         let mut _qv = qv.to_vec();
         let mut _t = t.to_vec();
         unsafe {
-            qrack_system::LDA(self.sid, _qi.len() as u64, _qi.as_mut_ptr(), _qv.len() as u64, _qv.as_mut_ptr(), _t.as_mut_ptr());
+            qrack_system::LDA(
+                self.sid,
+                _qi.len() as u64,
+                _qi.as_mut_ptr(),
+                _qv.len() as u64,
+                _qv.as_mut_ptr(),
+                _t.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1660,13 +1904,21 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if (8 * t.len()) < ((1 << qi.len()) * qv.len()) {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _qi = qi.to_vec();
         let mut _qv = qv.to_vec();
         let mut _t = t.to_vec();
         unsafe {
-            qrack_system::ADC(self.sid, s, _qi.len() as u64, _qi.as_mut_ptr(), _qv.len() as u64, _qv.as_mut_ptr(), _t.as_mut_ptr());
+            qrack_system::ADC(
+                self.sid,
+                s,
+                _qi.len() as u64,
+                _qi.as_mut_ptr(),
+                _qv.len() as u64,
+                _qv.as_mut_ptr(),
+                _t.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1686,13 +1938,21 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if (8 * t.len()) < ((1 << qi.len()) * qv.len()) {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _qi = qi.to_vec();
         let mut _qv = qv.to_vec();
         let mut _t = t.to_vec();
         unsafe {
-            qrack_system::SBC(self.sid, s, _qi.len() as u64, _qi.as_mut_ptr(), _qv.len() as u64, _qv.as_mut_ptr(), _t.as_mut_ptr());
+            qrack_system::SBC(
+                self.sid,
+                s,
+                _qi.len() as u64,
+                _qi.as_mut_ptr(),
+                _qv.len() as u64,
+                _qv.as_mut_ptr(),
+                _t.as_mut_ptr(),
+            );
         }
         self.check_error()
     }
@@ -1712,7 +1972,7 @@ impl QrackSimulator {
         //     RuntimeError: QrackSimulator raised an exception.
 
         if (8 * t.len()) < (1 << q.len()) {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _q = q.to_vec();
         let mut _t = t.to_vec();
@@ -2031,12 +2291,12 @@ impl QrackSimulator {
         // Returns:
         //     If the qubit was in `|0>` state with small tolerance.
 
-        let result:bool;
+        let result: bool;
         unsafe {
             result = qrack_system::release(self.sid, q);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2053,12 +2313,12 @@ impl QrackSimulator {
         // Returns:
         //     Qubit count of the simulator
 
-        let result:u64;
+        let result: u64;
         unsafe {
             result = qrack_system::num_qubits(self.sid);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2108,7 +2368,7 @@ impl QrackSimulator {
             other.sid = qrack_system::Decompose(self.sid, _q.len() as u64, _q.as_mut_ptr());
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(other)
     }
@@ -2135,22 +2395,22 @@ impl QrackSimulator {
     }
 
     // pub fn in_ket(&self, ket: *mut f32) -> Result<(), QrackError> {
-        // Set state vector
-        //
-        // Set state vector for the selected simulator ID.
-        //
-        // Warning: State vector is not always the internal representation, leading
-        // to sub-optimal performance of the method.
-        //
-        // Note: By design of this interface layer between Rust and C++, Qrack
-        // cannot guarantee that your input ket is not insecurely mutated, but it
-        // "promises" you that it does not intend to ever mutate it.
-        //
-        // Args:
-        //     ket(*mut f32): the state vector to which simulator will be set
-        //
-        // Raises:
-        //     RuntimeError: Not implemented for the given builds.
+    // Set state vector
+    //
+    // Set state vector for the selected simulator ID.
+    //
+    // Warning: State vector is not always the internal representation, leading
+    // to sub-optimal performance of the method.
+    //
+    // Note: By design of this interface layer between Rust and C++, Qrack
+    // cannot guarantee that your input ket is not insecurely mutated, but it
+    // "promises" you that it does not intend to ever mutate it.
+    //
+    // Args:
+    //     ket(*mut f32): the state vector to which simulator will be set
+    //
+    // Raises:
+    //     RuntimeError: Not implemented for the given builds.
 
     //     unsafe {
     //         qrack_system::InKet(self.sid, ket);
@@ -2159,18 +2419,18 @@ impl QrackSimulator {
     // }
 
     // pub fn out_ket(self, ket: *mut f32) -> Result<(), QrackError> {
-        // Get state vector
-        //
-        // Returns the raw state vector of the simulator.
-        //
-        // Warning: State vector is not always the internal representation, leading
-        // to sub-optimal performance of the method.
-        //
-        // Args:
-        //     ket(*mut f32): the state vector to which simulator will be output
-        //
-        // Raises:
-        //     RuntimeError: Not implemented for the given builds.
+    // Get state vector
+    //
+    // Returns the raw state vector of the simulator.
+    //
+    // Warning: State vector is not always the internal representation, leading
+    // to sub-optimal performance of the method.
+    //
+    // Args:
+    //     ket(*mut f32): the state vector to which simulator will be output
+    //
+    // Raises:
+    //     RuntimeError: Not implemented for the given builds.
 
     //     unsafe {
     //         qrack_system::OutKet(self.sid, ket);
@@ -2196,16 +2456,21 @@ impl QrackSimulator {
         //     value in "c[i]", at once
 
         if q.len() != c.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _q = q.to_vec();
         let mut _c = c.to_vec();
-        let result:f64;
+        let result: f64;
         unsafe {
-            result = qrack_system::PermutationProb(self.sid, _q.len() as u64, _q.as_mut_ptr(), _c.as_mut_ptr());
+            result = qrack_system::PermutationProb(
+                self.sid,
+                _q.len() as u64,
+                _q.as_mut_ptr(),
+                _c.as_mut_ptr(),
+            );
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2224,12 +2489,12 @@ impl QrackSimulator {
         // Returns:
         //     probability of qubit being in `|1>`
 
-        let result:f64;
+        let result: f64;
         unsafe {
             result = qrack_system::Prob(self.sid, q);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2250,17 +2515,22 @@ impl QrackSimulator {
         //     Expectation value
 
         let mut _c = c.to_vec();
-        let result:f64;
+        let result: f64;
         unsafe {
-            result = qrack_system::PermutationExpectation(self.sid, _c.len() as u64, _c.as_mut_ptr());
+            result =
+                qrack_system::PermutationExpectation(self.sid, _c.len() as u64, _c.as_mut_ptr());
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
 
-    pub fn joint_ensemble_probability(&self, b: Vec<Pauli>, q: Vec<u64>) -> Result<f64, QrackError> {
+    pub fn joint_ensemble_probability(
+        &self,
+        b: Vec<Pauli>,
+        q: Vec<u64>,
+    ) -> Result<f64, QrackError> {
         // Ensemble probability
         //
         // Find the joint probability for all specified qubits under the
@@ -2277,16 +2547,21 @@ impl QrackSimulator {
         //     Expectation value
 
         if b.len() != q.len() {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         let mut _b = b.to_vec();
         let mut _q = q.to_vec();
-        let result:f64;
+        let result: f64;
         unsafe {
-            result = qrack_system::JointEnsembleProbability(self.sid, _b.len() as u64, _b.as_mut_ptr() as *mut i32, _q.as_mut_ptr());
+            result = qrack_system::JointEnsembleProbability(
+                self.sid,
+                _b.len() as u64,
+                _b.as_mut_ptr() as *mut i32,
+                _q.as_mut_ptr(),
+            );
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2326,12 +2601,12 @@ impl QrackSimulator {
         // Returns:
         //     Success/failure of separation attempt
 
-        let result:bool;
+        let result: bool;
         unsafe {
             result = qrack_system::TrySeparate1Qb(self.sid, qi1);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2351,12 +2626,12 @@ impl QrackSimulator {
         // Returns:
         //     Success/failure of separation attempt
 
-        let result:bool;
+        let result: bool;
         unsafe {
             result = qrack_system::TrySeparate2Qb(self.sid, qi1, qi2);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2377,12 +2652,12 @@ impl QrackSimulator {
         //     Success/failure of separation attempt
 
         let mut _qs = qs.to_vec();
-        let result:bool;
+        let result: bool;
         unsafe {
             result = qrack_system::TrySeparateTol(self.sid, _qs.len() as u64, _qs.as_mut_ptr(), t);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }
@@ -2404,12 +2679,12 @@ impl QrackSimulator {
         //
         // Returns:
         //     Fidelity estimate
-        let result:f64;
+        let result: f64;
         unsafe {
             result = qrack_system::GetUnitaryFidelity(self.sid);
         }
         if self.get_error() != 0 {
-            return Err(QrackError{});
+            return Err(QrackError {});
         }
         Ok(result)
     }

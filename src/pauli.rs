@@ -14,5 +14,5 @@ pub enum Pauli {
     // Pauli Y operator. Corresponds to Q# constant "PauliY."
     PauliY = 3,
     // Pauli Z operator. Corresponds to Q# constant "PauliZ."
-    PauliZ = 2
+    PauliZ = 2,
 }

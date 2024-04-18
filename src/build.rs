@@ -6,7 +6,7 @@ fn main() {
     println!("cargo:rustc-link-lib=qrack_pinvoke");
 
     // Tell cargo to invalidate the built crate whenever the wrapper changes
-    println!("cargo:rerun-if-changed=include/pinvoke_api.hpp", );
+    println!("cargo:rerun-if-changed=include/pinvoke_api.hpp",);
 
     // The bindgen::Builder is the main entry point
     // to bindgen, and lets you build up options for

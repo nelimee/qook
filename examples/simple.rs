@@ -8,7 +8,24 @@ fn main() {
         q_reg.h(i).unwrap();
     }
     // Test mtrx array parameter
-    q_reg.mtrx(&[FRAC_1_SQRT_2, 0.0, FRAC_1_SQRT_2, 0.0, FRAC_1_SQRT_2, 0.0, -FRAC_1_SQRT_2, 0.0], 11).unwrap();
-    println!("Probability of highest bit for |1> state: {}", q_reg.prob(11).unwrap());
+    q_reg
+        .mtrx(
+            &[
+                FRAC_1_SQRT_2,
+                0.0,
+                FRAC_1_SQRT_2,
+                0.0,
+                FRAC_1_SQRT_2,
+                0.0,
+                -FRAC_1_SQRT_2,
+                0.0,
+            ],
+            11,
+        )
+        .unwrap();
+    println!(
+        "Probability of highest bit for |1> state: {}",
+        q_reg.prob(11).unwrap()
+    );
     println!("Random number less than 2^12: {}", q_reg.m_all().unwrap());
 }

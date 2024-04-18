@@ -9,12 +9,12 @@
 pub enum NeuronActivationFn {
     // Default
     Sigmoid = 0,
-    // Rectified linear 
+    // Rectified linear
     ReLU = 1,
     // Gaussian linear
     GeLU = 2,
     // Version of (default) "Sigmoid" with tunable sharpness
     GeneralizedLogistic = 3,
     // Leaky rectified linear
-    LeakyReLU = 4
+    LeakyReLU = 4,
 }
