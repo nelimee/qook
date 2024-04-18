@@ -45,6 +45,7 @@ impl QrackSimulator {
         }
         Ok(Self { sid })
     }
+    #[allow(clippy::too_many_arguments)]
     pub fn new_layers(
         qubit_count: u64,
         is_tensor_network: bool,
