@@ -97,7 +97,7 @@ impl QrackNeuron<'_> {
             nid = qrack_system::init_qneuron(
                 sim.get_sid(),
                 _controls.len() as u64,
-                _controls.as_mut_ptr() as *mut u64,
+                _controls.as_mut_ptr(),
                 trgt,
                 act_fn.clone() as u64,
                 a,

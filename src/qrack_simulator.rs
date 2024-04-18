@@ -360,7 +360,7 @@ impl QrackSimulator {
                 _b.len() as u64,
                 _b.as_mut_ptr() as *mut i32,
                 ph,
-                _q.as_mut_ptr() as *mut u64,
+                _q.as_mut_ptr(),
             );
         }
         self.check_error()
@@ -956,7 +956,7 @@ impl QrackSimulator {
                 ph,
                 _cs.len() as u64,
                 _cs.as_mut_ptr(),
-                _q.as_mut_ptr() as *mut u64,
+                _q.as_mut_ptr(),
             );
         }
         self.check_error()
